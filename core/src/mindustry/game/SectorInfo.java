@@ -6,6 +6,8 @@ import arc.struct.*;
 import arc.util.*;
 import mindustry.content.*;
 import mindustry.ctype.*;
+import mindustry.game.strategy.*;
+import mindustry.game.strategy.core.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
@@ -83,6 +85,8 @@ public class SectorInfo{
 
     public ObjectFloatMap<Item> importCooldownTimers = new ObjectFloatMap<>();
     public @Nullable transient float[] importRateCache;
+    /** Compiled lightweight production & logistics profile for real-time background simulation. */
+    public @Nullable SectorStrategyProfile strategyProfile;
 
     /** Temporary seq for last imported items. Do not use. */
     public transient ItemSeq lastImported = new ItemSeq();
@@ -246,6 +250,10 @@ public class SectorInfo{
         //disable export when launch pads are disabled, or there aren't any active ones
         if(pads.size == 0 || !pads.contains(t -> t.efficiency > 0)){
             export.clear();
+        }
+
+        if(sector.planet != null && sector.planet.campaignRules.globalLogistics){
+            SectorProfileCompiler.compileCurrentSector(sector, this);
         }
 
         sector.saveInfo();

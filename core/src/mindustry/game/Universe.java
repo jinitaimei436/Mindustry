@@ -8,6 +8,7 @@ import mindustry.content.*;
 import mindustry.game.EventType.*;
 import mindustry.game.Schematic.*;
 import mindustry.game.SectorInfo.*;
+import mindustry.game.strategy.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.world.blocks.storage.*;
@@ -24,6 +25,7 @@ public class Universe{
 
     private @Nullable Schematic lastLoadout;
     private ItemSeq lastLaunchResources = new ItemSeq();
+    public final GlobalStrategyManager strategy = new GlobalStrategyManager();
 
     public Universe(){
         load();
@@ -74,8 +76,19 @@ public class Universe{
             }
 
             if(secondCounter >= 1){
-                seconds += (int)secondCounter;
+                int elapsedSec = (int)secondCounter;
+                seconds += elapsedSec;
                 secondCounter %= 1f;
+
+                // Real-time 1-second step for global logistics & strategic layer
+                Planet curPlanet = state.getPlanet();
+                for(Planet planet : content.planets()){
+                    if(!planet.campaignRules.globalLogistics) continue;
+                    if(curPlanet != null && curPlanet != planet && !curPlanet.updateGroup.contains(planet) && !planet.updateGroup.contains(curPlanet)){
+                        continue;
+                    }
+                    strategy.update(planet, elapsedSec);
+                }
 
                 //save every few seconds
                 if(seconds % 10 == 1){
@@ -162,7 +175,7 @@ public class Universe{
                 continue;
             }
 
-            if(planet.campaignRules.legacyLaunchPads){
+            if(planet.campaignRules.legacyLaunchPads && !planet.campaignRules.globalLogistics){
                 //first pass: clear import stats
                 for(Sector sector : planet.sectors){
                     if(sector.hasBase() && !sector.isBeingPlayed()){
@@ -209,10 +222,12 @@ public class Universe{
                         //increment seconds passed for this sector by the time that just passed with this turn
                         if(!sector.isBeingPlayed()){
 
-                            //add production, making sure that it's capped
-                            sector.info.production.each((item, stat) -> sector.info.items.add(item, Math.min((int)(stat.mean * newSecondsPassed), sector.info.storageCapacity - sector.info.items.get(item))));
+                            //add production only when globalLogistics is disabled (globalLogistics updates every second)
+                            if(!planet.campaignRules.globalLogistics){
+                                sector.info.production.each((item, stat) -> sector.info.items.add(item, Math.min((int)(stat.mean * newSecondsPassed), sector.info.storageCapacity - sector.info.items.get(item))));
+                            }
 
-                            if(planet.campaignRules.legacyLaunchPads){
+                            if(planet.campaignRules.legacyLaunchPads && !planet.campaignRules.globalLogistics){
                                 sector.info.export.each((item, stat) -> {
                                     if(sector.info.items.get(item) <= 0 && sector.info.production.get(item, ExportStat::new).mean < 0 && stat.mean > 0){
                                         //cap export by import when production is negative.

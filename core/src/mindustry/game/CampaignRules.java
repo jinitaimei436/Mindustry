@@ -14,6 +14,7 @@ public class CampaignRules{
     public boolean rtsAI;
     public boolean clearSectorOnLose;
     public boolean pauseDisabled;
+    public boolean globalLogistics = true;
 
     public void apply(Planet planet, Rules rules){
         rules.staticFog = rules.fog = fog;
