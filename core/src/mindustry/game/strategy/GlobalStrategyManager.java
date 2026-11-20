@@ -113,7 +113,8 @@ public class GlobalStrategyManager{
             profile.hasBase = sector.hasBase();
             profile.enemyBase = sector.hasEnemyBase();
             profile.storageCapacity = sector.info.storageCapacity;
-            sector.info.items.each((item, amount) -> profile.setStored(item.name, amount));
+            final SectorStrategyProfile created = profile;
+            sector.info.items.each((item, amount) -> created.setStored(item.name, amount));
 
             // Bootstrap legacy sectors that have not been re-visited yet using vanilla mean rates
             ProductionNode legacyNode = new ProductionNode("legacy-bootstrap");
