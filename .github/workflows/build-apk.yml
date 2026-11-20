@@ -36,13 +36,17 @@ jobs:
           "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
           ls "$ANDROID_HOME/platforms"
 
+      - name: Relax R8 for debug build
+        run: |
+          sed -i 's/minifyEnabled = true/minifyEnabled = false/; s/shrinkResources = true/shrinkResources = false/' android/build.gradle
+          grep -n "minifyEnabled\|shrinkResources" android/build.gradle
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build Debug APK
         run: |
           chmod +x gradlew
-          ./gradlew --version
           ./gradlew android:assembleDebug --stacktrace --no-daemon
 
       - name: Upload APK artifact
