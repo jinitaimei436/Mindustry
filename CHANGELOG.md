@@ -18,7 +18,7 @@
 | `CampaignRules.java` | 新增 `globalLogistics` 开关，默认 `true` |
 | `SectorInfo.java` | 新增 `strategyProfile` 字段；退出战场时编译产线画像 |
 | `Universe.java` | 秒级 tick 接入 `GlobalStrategyManager`；开启物流后关闭原版批次结算 |
-| `tests/src/test/java/GlobalLogisticsTests.java` | JUnit 5 单元测试（**尚未在 CI 执行成功**） |
+| `tests/src/test/java/GlobalLogisticsTests.java` | JUnit 5 单元测试 —— **已在 CI 通过**（tests:test，2m30s） |
 | `.github/workflows/build-apk.yml` | 云端构建 Debug APK 的工作流 |
 
 ### 构建修复（原始交付包无法编译）
@@ -36,7 +36,7 @@
 - debug 未混淆包，体积约 61 MB，启动略慢
 - 关闭 R8 后缺少 default interface 脱糖，**API < 24（Android 7 以下）可能崩溃**；Android 7+ 正常
 - `globalLogistics` 没有 UI 开关，只有代码默认值；实际效果**未经真机验证**
-- `tests/` 的单元测试未在 CI 中跑通
+- `tests/` 单元测试已在 CI 通过（含 GlobalLogisticsTests）
 
 ---
 
