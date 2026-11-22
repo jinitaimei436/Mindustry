@@ -3,6 +3,25 @@
 > 本仓库 = 可构建的 Mindustry 分支，用于产出可安装的 APK。
 > 纯源码（仅供 AI 阅读）在 [mindustry-src](https://github.com/jinitaimei436/mindustry-src)。
 
+## v2.8.1 — 2026-11-22（区块传送带物流 + 外观更新）
+
+### 新增功能
+
+| 模块 | 内容 |
+|---|---|
+| 区块传送带物流 | `SectorConveyorManager` / `SectorConveyorMath`：跨区块物品传输 |
+| 4 个新方块 | `basic-sector-conveyor-sender/receiver`（3×3）、`advanced-sector-conveyor-sender/receiver`（4×4） |
+| 平衡调整 | 移速修饰、EMP 效果、超速投影器数值微调 |
+| UI | 星球界面新增区块物流相关面板 |
+
+### 美术资源
+
+- **替换**：`surge-sector-power-hub*` 全部 38 张（新版 vanilla 风格，128×128）
+- **新增**：区块传送带方块 8 张
+
+> 提供的贴图按 `input/output` 命名，代码中的方块名是 `receiver/sender`，导入时做了对应映射：
+> `sector-input → sector-conveyor-receiver`（物品流入本区块）、`sector-output → sector-conveyor-sender`（流出到跨区块网络）。
+> `basic` 为 96×96（3×3），`advanced` 为 128×128（4×4），与代码 `size` 一致。
 ## v2.5 — 2026-11-22（跨区块电网 + 单位编队 + 电力枢纽方块）
 
 ### 新增功能
