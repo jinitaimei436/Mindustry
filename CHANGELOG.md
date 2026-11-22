@@ -3,6 +3,41 @@
 > 本仓库 = 可构建的 Mindustry 分支，用于产出可安装的 APK。
 > 纯源码（仅供 AI 阅读）在 [mindustry-src](https://github.com/jinitaimei436/mindustry-src)。
 
+## v2.8.3 — 2026-11-22（修复：点「配对」必闪退 / 跨区块电网潜在闪退）
+
+### 症状（用户实测）
+
+打开「资源视野」→ 点「配对」→ 必定闪退。logcat：
+
+```
+java.lang.NoClassDefFoundError: Failed resolution of: Ljava/util/Comparator$-CC;
+  at SectorConveyorMath$PlanetConveyorTopology.getSectorPorts(SectorConveyorMath.java:378)
+  at SectorConveyorManager.getAvailableAdjacentTargets(SectorConveyorManager.java:213)
+  at PlanetDialog.showPortPairingDialog(PlanetDialog.java:1932)
+```
+
+### 根因
+
+代码使用了 **Java 8 接口静态方法** `Comparator.comparingInt(...)`：
+
+```java
+out.sort(Comparator.comparingInt(p -> p.portNumber));
+```
+
+本项目 `minSdk = 21`（< 24）且未启用 core library desugaring，构建时 R8 把调用重写为对合成类
+`java.util.Comparator$-CC` 的调用，但该类未被打进 APK → 运行到该行即 `NoClassDefFoundError`。
+
+### 修复
+
+改为显式比较器 lambda，不再依赖接口静态方法：
+
+| 文件:行 | 修改 |
+|---|---|
+| `SectorConveyorMath.java:378` | `Comparator.comparingInt(p -> p.portNumber)` → `(a, b) -> Integer.compare(a.portNumber, b.portNumber)` |
+| `SectorPowerGridMath.java:604` | `Comparator.comparingInt(n -> n.sectorId)` → `(a, b) -> Integer.compare(a.sectorId, b.sectorId)` |
+
+> 第二处尚未被玩家触发（跨区块电网的多节点排序路径），属同类潜在地雷，一并修掉。
+> 全仓库已确认无其他 `Comparator.comparing*` / `List.of` / `Map.of` 等接口静态方法用法。
 ## v2.8.2 — 2026-11-22（修正：区块传送带方块贴图方向）
 
 ### 问题
