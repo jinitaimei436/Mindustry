@@ -3,6 +3,39 @@
 > 本仓库 = 可构建的 Mindustry 分支，用于产出可安装的 APK。
 > 纯源码（仅供 AI 阅读）在 [mindustry-src](https://github.com/jinitaimei436/mindustry-src)。
 
+## v1.6 — 2026-11-22
+
+战斗节奏平衡系统 + 战略层增强。改动 14 个文件（12 改 + 2 新增），约 +1120 行。
+
+### 新增
+
+| 文件 | 说明 |
+|---|---|
+| `core/src/mindustry/content/CombatPaceBalancer.java` | 新增：全局战斗节奏修饰器，按难度缩放伤害、波次间隔、建造速度 |
+| `tests/src/test/java/mindustry/content/CombatPaceBalancerTests.java` | 新增：对应单元测试（354 行） |
+
+### 修改
+
+| 文件 | 说明 |
+|---|---|
+| `game/Rules.java` (+25) | 支持战斗节奏修饰的幂等应用 |
+| `io/JsonIO.java` (+153) | 序列化能力增强（供平衡配置读写） |
+| `core/ContentLoader.java` (+1) | 注册相关类型 |
+| `core/Version.java` (+2) | 版本信息更新 |
+| `maps/Map.java` (+4) | 小改 |
+| `game/CampaignRules.java` (+3) | 新增字段 |
+| `game/strategy/GlobalStrategyManager.java` (+159/−17) | 战略调度增强 |
+| `game/strategy/SectorProfileCompiler.java` (+59/−18) | 产线编译增强 |
+| `game/strategy/core/PlanetNetworkSolver.java` (+176/−56) | 物流求解器增强（多跳/环链处理） |
+| `game/strategy/core/StrategySimulationEngine.java` (+31/−12) | 模拟引擎增强 |
+| `game/strategy/core/SectorStrategyProfile.java` (+13) | 区块画像字段扩展 |
+| `game/strategy/core/LogisticsRoute.java` (+5/−1) | 路由字段扩展 |
+
+### 说明
+
+- `editor/DrawOperation.java`、`editor/OperationStack.java`、`graphics/Voronoi.java` 在 AI Studio 同步时只有权限位变动、内容无差异，已忽略。
+- 1.6 代码由上游 AI 在 AI Studio 生成，经 `mindustry-src` 仓库中转合并进本仓库。
+
 ## v1.5 — 2026-11-21
 
 首个可安装构建（debug，未混淆，包名 `io.anuke.mindustry`）。
