@@ -24,9 +24,9 @@ java.lang.AbstractMethodError: abstract method "void arc.Application.addListener
 
 ### 修复
 
-- 恢复 R8（`minifyEnabled = true`、`shrinkResources = true`），不再 sed 覆盖 `android/build.gradle`
-- 用「提供一个 Java 资源文件」`android/src/main/resources/mindustry/fork-version.txt`，
-  让 `mergeJavaResource` 不再 NO-SOURCE、正常产出 `base.jar`，从而绕开 AGP bug
+- **升级 AGP 8.2.2 → 8.13.2**（真正的原因：8.2.2 的 R8 读不到 `merged_java_res/base.jar`，后续版本已修）
+- 恢复 R8 开启（`minifyEnabled = true`、`shrinkResources = true`），不再 sed 覆盖 `android/build.gradle`
+  并额外提供 Java 资源文件作为兜底
 - CI 增加校验：检查 APK 的 dex 中是否有 `Application$-CC` 脱糖伴随类，缺失即视为构建失败
 
 ### 说明
