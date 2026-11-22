@@ -43,10 +43,16 @@ jobs:
           "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
           ls "$ANDROID_HOME/platforms"
 
-      - name: Relax R8 for debug build
+      # AGP 8.2 bug: with no java resources the "mergeDebugJavaResource" task is NO-SOURCE,
+      # so R8 fails with NoSuchFileException on merged_java_res/debug/base.jar.
+      # Providing one java resource makes the task produce base.jar. R8 must stay ENABLED:
+      # it performs default-interface-method desugaring, without which the app crashes
+      # with AbstractMethodError: arc.Application.addListener on launch.
+      - name: Provide java resource (works around AGP merged_java_res bug)
         run: |
-          sed -i 's/minifyEnabled = true/minifyEnabled = false/; s/shrinkResources = true/shrinkResources = false/' android/build.gradle
-          grep -n "minifyEnabled\|shrinkResources" android/build.gradle
+          mkdir -p android/src/main/resources/mindustry
+          echo "mindustry fork build" > android/src/main/resources/mindustry/fork-version.txt
+          find android/src/main/resources -type f
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -55,6 +61,14 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew android:assembleDebug --stacktrace --no-daemon
+
+      - name: Verify APK contains desugared companion classes
+        run: |
+          APK=$(ls android/build/outputs/apk/debug/*.apk | head -1)
+          echo "apk: $APK"
+          unzip -p "$APK" 'classes*.dex' > /tmp/all.dex
+          if grep -a -q 'Application\$-CC' /tmp/all.dex; then echo 'DESUGAR-OK: companion classes present'; else echo 'WARN: no \$-CC companion found'; fi
+          ls -l "$APK"
 
       - name: Rename APK with version
         run: |

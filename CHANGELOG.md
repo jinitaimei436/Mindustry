@@ -3,6 +3,36 @@
 > 本仓库 = 可构建的 Mindustry 分支，用于产出可安装的 APK。
 > 纯源码（仅供 AI 阅读）在 [mindustry-src](https://github.com/jinitaimei436/mindustry-src)。
 
+## v1.6.1 — 2026-11-22（紧急修复：启动闪退）
+
+### 问题
+
+v1.5 / v1.6 安装后**一打开就闪退**：
+
+```
+java.lang.AbstractMethodError: abstract method "void arc.Application.addListener(arc.ApplicationListener)"
+  at arc.backend.android.AndroidApplication.init(AndroidApplication.java:112)
+  at mindustry.android.AndroidLauncher.onCreate(AndroidLauncher.java:58)
+```
+
+### 根因
+
+为绕开 AGP 8.2 的 `merged_java_res/base.jar` bug，之前的 CI 在构建前把 `minifyEnabled` 关掉了。
+但 **R8 同时负责 default interface method 的脱糖**（`android/build.gradle` 里本来就有注释警告这一点），
+关掉后 `arc.Application` 的默认方法退化为抽象方法，启动即 `AbstractMethodError`。
+这是**装包配置错误，不是 1.6 代码的问题**。
+
+### 修复
+
+- 恢复 R8（`minifyEnabled = true`、`shrinkResources = true`），不再 sed 覆盖 `android/build.gradle`
+- 用「提供一个 Java 资源文件」`android/src/main/resources/mindustry/fork-version.txt`，
+  让 `mergeJavaResource` 不再 NO-SOURCE、正常产出 `base.jar`，从而绕开 AGP bug
+- CI 增加校验：检查 APK 的 dex 中是否有 `Application$-CC` 脱糖伴随类，缺失即视为构建失败
+
+### 说明
+
+- 代码与 v1.6 完全一致，仅构建配置变化
+- 本版产物**开启 R8**，体积应明显小于 v1.6 的 61 MB
 ## v1.6 — 2026-11-22
 
 战斗节奏平衡系统 + 战略层增强。改动 14 个文件（12 改 + 2 新增），约 +1120 行。
