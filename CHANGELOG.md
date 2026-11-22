@@ -3,6 +3,23 @@
 > 本仓库 = 可构建的 Mindustry 分支，用于产出可安装的 APK。
 > 纯源码（仅供 AI 阅读）在 [mindustry-src](https://github.com/jinitaimei436/mindustry-src)。
 
+## v2.8.2 — 2026-11-22（修正：区块传送带方块贴图方向）
+
+### 问题
+
+v2.8.1 导入区块传送带方块贴图时，把 `input` / `output` 与代码里的 `receiver` / `sender` 映射反了：
+发射端（sender）错用了接收端的美术，接收端（receiver）错用了发射端的美术，UI 图标（`-full`）也随之装反。
+
+### 修复
+
+8 张贴图全部对调：
+
+| 原提供文件 | v2.8.1（错误） | v2.8.2（正确） |
+|---|---|---|
+| `*-sector-input.png` | `*-sector-conveyor-receiver.png` | **`*-sector-conveyor-sender.png`** |
+| `*-sector-output.png` | `*-sector-conveyor-sender.png` | **`*-sector-conveyor-receiver.png`** |
+
+方块内部名、尺寸、代码均未改动，仅替换贴图文件内容。
 ## v2.8.1 — 2026-11-22（区块传送带物流 + 外观更新）
 
 ### 新增功能
