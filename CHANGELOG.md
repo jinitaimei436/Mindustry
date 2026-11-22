@@ -3,6 +3,25 @@
 > 本仓库 = 可构建的 Mindustry 分支，用于产出可安装的 APK。
 > 纯源码（仅供 AI 阅读）在 [mindustry-src](https://github.com/jinitaimei436/mindustry-src)。
 
+## v3.0 — 2026-11-22（存档持久化 + UI/连线修复）
+
+### 新增 / 修复
+
+| 内容 | 说明 |
+|---|---|
+| 存档持久化 | 新增 `SaveWriteEvent` / `SaveLoadEvent` 监听，区块电网与物流状态随存档读写 |
+| 手动保存 | `Universe` 中实现手动触发保存 |
+| 重载一致性 | `PowerGraph` 增加电力枢纽校验，读档后确保电网拓扑一致 |
+| UI 修复 | `PlanetDialog` 布局与电力连线逻辑调整（+198/−146） |
+| 物流管理器 | `SectorConveyorManager` 端口/配对逻辑重构（+54/−39） |
+| 电网管理器 | `SectorPowerGridManager` 读写与校验增强（+79/−13） |
+
+### 装包侧检查
+
+- 版本号 `forkVersion = v3.0`，`VERSION` 同步为 `3.0`
+- 复查既有两类构建坑，均未复发：
+  - 无 `Comparator.comparing*` / `List.of` / `Map.of` 等 Java 8 接口静态方法
+  - 无 `addLast(item.id)`（`short` 未转 `int`）
 ## v2.8.3 — 2026-11-22（修复：点「配对」必闪退 / 跨区块电网潜在闪退）
 
 ### 症状（用户实测）
