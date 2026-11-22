@@ -48,6 +48,13 @@ jobs:
       # Providing one java resource makes the task produce base.jar. R8 must stay ENABLED:
       # it performs default-interface-method desugaring, without which the app crashes
       # with AbstractMethodError: arc.Application.addListener on launch.
+      # AGP 8.2.2 shipped a bug where R8 cannot read merged_java_res/base.jar
+      # (NoSuchFileException in :android:minifyDebugWithR8). Fixed in later AGP.
+      - name: Upgrade Android Gradle Plugin
+        run: |
+          sed -i "s#com.android.tools.build:gradle:8.2.2#com.android.tools.build:gradle:8.13.2#" android/build.gradle
+          grep -n "com.android.tools.build:gradle" android/build.gradle
+
       - name: Provide java resource (works around AGP merged_java_res bug)
         run: |
           mkdir -p android/src/main/resources/mindustry
