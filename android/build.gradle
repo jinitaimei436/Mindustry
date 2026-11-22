@@ -6,7 +6,7 @@ buildscript{
     }
 
     dependencies{
-        classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath 'com.android.tools.build:gradle:8.13.2'
     }
 }
 
@@ -162,5 +162,21 @@ if(!project.ext.hasSprites()){
         if(task.name == 'assembleDebug' || task.name == 'assembleRelease'){
             task.dependsOn ":tools:pack"
         }
+    }
+}
+
+
+// --- fork build fixes (do not remove) ---
+// 1) AGP 8.2.2's R8 could not read merged_java_res/base.jar; 8.13.2 fixes it.
+//    R8 must stay ENABLED: it performs default-interface-method desugaring,
+//    without which the game crashes on launch with
+//    AbstractMethodError: arc.Application.addListener
+// 2) :tools:pack generates sprites.aatlas/.aatls/sprites.png. Without this
+//    dependency the assets are merged BEFORE the atlas exists, so the APK
+//    ships without sprites.aatls and crashes on
+//    FileNotFoundException: sprites/sprites.aatls
+tasks.configureEach{ t ->
+    if(t.name == 'mergeDebugAssets' || t.name == 'mergeReleaseAssets'){
+        t.dependsOn ':tools:pack'
     }
 }

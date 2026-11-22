@@ -3,6 +3,30 @@
 > 本仓库 = 可构建的 Mindustry 分支，用于产出可安装的 APK。
 > 纯源码（仅供 AI 阅读）在 [mindustry-src](https://github.com/jinitaimei436/mindustry-src)。
 
+## v2.0.1 — 2026-11-22（V2 多区块合作系统）
+
+### 新增（上游 AI 交付）
+
+- `core/src/mindustry/game/coop/` 全新包：多区块合作协调、区块占用、远端区块桥接、战役数据分片传输、权限
+- `net/CampaignPacket`：战役相关网络包
+- `NetServer` / `NetClient` / `Net` / `NetConnection` / `Control` / `GameState` / `WorldReloader`：多人战役同步改造
+- `PlanetDialog` / `HostDialog` / `PlayerListFragment` / `ResearchDialog` 等 UI 适配
+- `tests/.../MultiSectorCoopTests.java`：新增单元测试
+
+### 合并时的处理（装包侧）
+
+- **未采用上游自带的 `.github/workflows/build-apk.yml`**：它缺少 `tools:pack` 步骤，会重新制造「缺图集闪退」
+- **未合并** `public/assets/aistudio/*.txt`（AI Studio 导出残留）与 src 仓库的 `README.md`
+- `JsonIO.java` 的 6 处 `java.util.Map.Entry` 已沿用之前的修复（V2 代码里已正确）
+
+### 两个闪退问题的最终处置（已固化进仓库，不再依赖 CI 补丁）
+
+| 问题 | 修复位置 |
+|---|---|
+| `AbstractMethodError: arc.Application.addListener`（R8 未脱糖） | `android/build.gradle`：AGP `8.2.2 → 8.13.2`，保持 `minifyEnabled = true` |
+| `FileNotFoundException: sprites/sprites.aatls`（图集没进包） | `android/build.gradle`：新增 `mergeDebugAssets/mergeReleaseAssets dependsOn ':tools:pack'` |
+
+> 也就是说：现在任何人 clone 本仓库直接执行 `./gradlew android:assembleDebug`，都能得到可正常启动的 APK，不再需要 CI 里的临时补丁。
 ## v1.6.2 — 2026-11-22（修复：进入游戏 1 秒后闪退）
 
 ### 症状
