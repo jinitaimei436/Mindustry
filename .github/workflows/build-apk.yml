@@ -18,6 +18,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Read version
+        id: ver
+        run: |
+          if [ -f VERSION ]; then V=$(tr -d '[:space:]' < VERSION); else V=$(git rev-parse --short HEAD); fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "Building Mindustry v$V"
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -49,9 +56,15 @@ jobs:
           chmod +x gradlew
           ./gradlew android:assembleDebug --stacktrace --no-daemon
 
+      - name: Rename APK with version
+        run: |
+          mkdir -p out
+          for f in android/build/outputs/apk/debug/*.apk; do cp "$f" "out/mindustry-v${{ steps.ver.outputs.version }}-debug.apk"; done
+          ls -l out
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mindustry-global-logistics-debug-apk
-          path: android/build/outputs/apk/debug/*.apk
-          retention-days: 30
+          name: mindustry-${{ steps.ver.outputs.version }}-debug-apk
+          path: out/*.apk
+          retention-days: 14
