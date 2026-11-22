@@ -3,6 +3,35 @@
 > 本仓库 = 可构建的 Mindustry 分支，用于产出可安装的 APK。
 > 纯源码（仅供 AI 阅读）在 [mindustry-src](https://github.com/jinitaimei436/mindustry-src)。
 
+## v2.5 — 2026-11-22（跨区块电网 + 单位编队 + 电力枢纽方块）
+
+### 新增功能
+
+| 模块 | 内容 |
+|---|---|
+| `game/power/` | 跨区块电网：`SectorPowerGridManager` / `SectorPowerGridMath`，多区块实时电力与共享蓄电池互通 |
+| `world/blocks/power/SurgeSectorPowerHub` | 4×4「巨浪区块电力枢纽」方块，每区块限 1 座，半径 20 格并入跨区块电网（纯传输无蓄电） |
+| 动画控制器 | 启动 / 运行 / 关闭三态状态机 + 帧序列自动扫描（`HubAnimationController`） |
+| `ai/formation/` | 单位编队系统：`FormationManager` / `FormationMath` / `TacticalFormation` |
+| `net/FormationPacket` | 编队同步网络包 |
+| UI | 星球界面「电力视野」面板、单位指挥面板「编队」区块、方块状态条 |
+
+### 美术资源（本次导入）
+
+`core/assets-raw/sprites/blocks/power/` 下新增 38 张 128×128 PNG：
+
+- `surge-sector-power-hub.png`（基础外观）+ `-full.png`（图标）
+- `-idle.png`（待机）、`-glow.png`（加色发光层）
+- `-start0..11.png`（启动 12 帧）
+- `-run0..11.png`（运行循环 12 帧）
+- `-stop0..9.png`（关闭 10 帧）
+
+> 命名严格匹配 `SurgeSectorPowerHub.load()` 的自动扫描规则：`<块名>-<前缀><连续编号>`，起始 0、不跳号。
+
+### 装包侧处理
+
+- 合并 `1a08d281`（2.5 主功能）与 `1c4338bd`（动画控制器）两个上游提交
+- 未合并上游删除的 `.github/`、`VERSION`（构建仓库自带）
 ## v2.0.1 — 2026-11-22（V2 多区块合作系统）
 
 ### 新增（上游 AI 交付）
