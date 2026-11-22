@@ -15,8 +15,7 @@ jobs:
     timeout-minutes: 120
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Read version
         id: ver
@@ -25,8 +24,7 @@ jobs:
           echo "version=$V" >> "$GITHUB_OUTPUT"
           echo "Building Mindustry v$V"
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: 17
@@ -38,44 +36,45 @@ jobs:
         run: |
           set -e
           SDKMANAGER=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -1)
-          echo "sdkmanager: $SDKMANAGER"
           yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
           "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
           ls "$ANDROID_HOME/platforms"
 
-      # AGP 8.2 bug: with no java resources the "mergeDebugJavaResource" task is NO-SOURCE,
-      # so R8 fails with NoSuchFileException on merged_java_res/debug/base.jar.
-      # Providing one java resource makes the task produce base.jar. R8 must stay ENABLED:
-      # it performs default-interface-method desugaring, without which the app crashes
-      # with AbstractMethodError: arc.Application.addListener on launch.
-      # AGP 8.2.2 shipped a bug where R8 cannot read merged_java_res/base.jar
-      # (NoSuchFileException in :android:minifyDebugWithR8). Fixed in later AGP.
+      # --- 关键修复 1: AGP 8.2.2 的 R8 读不到 merged_java_res/base.jar，升级到 8.13.2
+      # 千万不要用 minifyEnabled=false 绕过：R8 同时负责 default interface method 脱糖，
+      # 关掉后启动即 AbstractMethodError: arc.Application.addListener
       - name: Upgrade Android Gradle Plugin
         run: |
           sed -i "s#com.android.tools.build:gradle:8.2.2#com.android.tools.build:gradle:8.13.2#" android/build.gradle
           grep -n "com.android.tools.build:gradle" android/build.gradle
 
-      - name: Provide java resource (works around AGP merged_java_res bug)
+      - name: Provide java resource
         run: |
           mkdir -p android/src/main/resources/mindustry
-          echo "mindustry fork build" > android/src/main/resources/mindustry/fork-version.txt
-          find android/src/main/resources -type f
+          echo "build" > android/src/main/resources/mindustry/fork-version.txt
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build Debug APK
+      # --- 关键修复 2: android/build.gradle 只让 assembleDebug 依赖 :tools:pack，
+      # 没约束 mergeDebugAssets，导致图集在 assets 打包之后才生成，APK 里缺
+      # sprites.aatlas/.aatls，进主菜单时崩: FileNotFoundException sprites/sprites.aatls
+      - name: Pack sprite atlases
         run: |
           chmod +x gradlew
-          ./gradlew android:assembleDebug --stacktrace --no-daemon
+          ./gradlew tools:pack --stacktrace --no-daemon
+          ls -l core/assets/sprites/*.aatl* || true
 
-      - name: Verify APK contains desugared companion classes
+      - name: Build Debug APK
+        run: ./gradlew android:assembleDebug --stacktrace --no-daemon
+
+      - name: Verify APK (desugaring + sprite atlas)
         run: |
           APK=$(ls android/build/outputs/apk/debug/*.apk | head -1)
           echo "apk: $APK"
+          unzip -l "$APK" | grep -E 'assets/sprites/sprites.aatl' || (echo 'FATAL: sprite atlas missing from APK'; exit 1)
           unzip -p "$APK" 'classes*.dex' > /tmp/all.dex
-          if grep -a -q 'Application\$-CC' /tmp/all.dex; then echo 'DESUGAR-OK: companion classes present'; else echo 'WARN: no \$-CC companion found'; fi
-          ls -l "$APK"
+          grep -a -q 'Application\$-CC' /tmp/all.dex || (echo 'FATAL: default interface methods not desugared'; exit 1)
+          echo 'VERIFY-OK: atlas + desugared companions present'
 
       - name: Rename APK with version
         run: |
@@ -83,8 +82,7 @@ jobs:
           for f in android/build/outputs/apk/debug/*.apk; do cp "$f" "out/mindustry-v${{ steps.ver.outputs.version }}-debug.apk"; done
           ls -l out
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: mindustry-${{ steps.ver.outputs.version }}-debug-apk
           path: out/*.apk

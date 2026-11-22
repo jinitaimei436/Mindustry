@@ -3,6 +3,42 @@
 > 本仓库 = 可构建的 Mindustry 分支，用于产出可安装的 APK。
 > 纯源码（仅供 AI 阅读）在 [mindustry-src](https://github.com/jinitaimei436/mindustry-src)。
 
+## v1.6.2 — 2026-11-22（修复：进入游戏 1 秒后闪退）
+
+### 症状
+
+v1.6.1 启动正常，但进入加载界面约 1 秒后崩溃：
+
+```
+arc.util.ArcRuntimeException: Error reading pack file: sprites/sprites.aatls
+  at arc.graphics.g2d.TextureAtlas$TextureAtlasData.<init>(TextureAtlas.java:365)
+  at mindustry.ClientLauncher.update(ClientLauncher.java:236)
+Caused by: java.io.FileNotFoundException: sprites/sprites.aatls
+```
+
+### 根因（构建顺序 bug）
+
+`android/build.gradle` 只声明了 `assembleDebug.dependsOn ':tools:pack'`，**没有约束 `mergeDebugAssets`**。
+实际执行顺序变成：
+
+```
+02:56:45  > Task :android:mergeDebugAssets     ← 先把 assets 打进 APK（此时还没有图集）
+02:57:23  > Task :tools:pack                   ← 之后才生成 sprites.aatlas / .aatls / .png
+```
+
+结果 APK 里只有 13 张零散 PNG，没有 `sprites.aatls`，进主菜单读图集即崩。
+
+### 修复
+
+- CI 中**先单独执行 `./gradlew tools:pack`**，再执行 `android:assembleDebug`，确保图集先落盘
+- CI 校验步骤增加两项硬性检查，任一缺失即构建失败：
+  - APK 内必须存在 `assets/sprites/sprites.aatl*`
+  - dex 内必须存在 `Application$-CC`（脱糖伴随类）
+
+### 说明
+
+- 代码与 v1.6 / v1.6.1 完全一致，仍然只改构建流程
+- 这类问题在本地开发时不出现（本地已有生成好的图集），只在干净 CI 环境暴露
 ## v1.6.1 — 2026-11-22（紧急修复：启动闪退）
 
 ### 问题
