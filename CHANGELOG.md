@@ -3,6 +3,25 @@
 > 本仓库 = 可构建的 Mindustry 分支，用于产出可安装的 APK。
 > 纯源码（仅供 AI 阅读）在 [mindustry-src](https://github.com/jinitaimei436/mindustry-src)。
 
+## v3.1 — 2026-11-22（全球物流强制化 + 跨区块扩展接口）
+
+### 变更
+
+| 模块 | 说明 |
+|---|---|
+| 全球物流强制化 | `CampaignRules` 调整，物流不再依赖开关；`Universe` 移除了旧的批次结算逻辑（−57 行） |
+| 跨区块扩展接口 | 新增 `CrossSectorExtension` / `CrossSectorConveyorExtension` / `CrossSectorPowerExtension` |
+| 战略层 | `GlobalStrategyManager`、`SectorProfileCompiler`、`PlanetNetworkSolver`、`SectorStrategyProfile` 增强 |
+| 区块物流 | `SectorConveyorManager` / `SectorConveyorMath` 解析与配对逻辑增强 |
+| 测试 | 新增 `RealTimeSettlementTests` |
+
+### 装包侧复核
+
+| 检查项 | 结果 |
+|---|---|
+| `Comparator.comparing*` 等 Java 8 接口静态方法 | ✅ 无 |
+| `addLast(item.id)`（short 未强转） | ✅ 无 |
+| `SurgeSectorPowerHub` 的 `mindustry.type` import | ⚠️ 上游 src 仍缺失，构建仓库保留已修版本（该文件本版未改动，不受影响） |
 ## v3.0 — 2026-11-22（存档持久化 + UI/连线修复）
 
 ### 新增 / 修复
