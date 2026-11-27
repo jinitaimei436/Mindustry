@@ -867,15 +867,17 @@ public class TroopLaunchPad extends Block{
                             boolean fits = tierOk && (boardedCp() + fCp <= padTier.regularCapCp);
                             final TacticalFormation formRef = f;
                             final int formCp = fCp;
+                            final boolean tierOkFinal = tierOk;
+                            final boolean fitsFinal = fits;
                             body.table(Tex.button, row -> {
                                 row.left();
                                 row.add("编队 #" + f.id + "（" + members.size + " 台 / " + formCp + " 点）"
-                                    + (tierOk ? "" : " [scarlet][含超阶单位][]")).growX().left();
+                                    + (tierOkFinal ? "" : " [scarlet][含超阶单位][]")).growX().left();
                                 row.button("召回登舱", Icon.add, () -> {
                                     int cnt = summonFormation(formRef);
                                     if(ui != null) ui.showInfoFade("已召回编队 #" + formRef.id + "（" + cnt + " 台）前往登舱");
                                     rebuild[0].run();
-                                }).size(120f, 38f).disabled(!fits);
+                                }).size(120f, 38f).disabled(!fitsFinal);
                             }).growX().row();
                         }
                     }
