@@ -3,6 +3,39 @@
 > 本仓库 = 可构建的 Mindustry 分支，用于产出可安装的 APK。
 > 纯源码（仅供 AI 阅读）在 [mindustry-src](https://github.com/jinitaimei436/mindustry-src)。
 
+## v3.9 — 2026-11-27（跨区块部队空运）
+
+### 新增
+
+| 模块 | 说明 |
+|---|---|
+| 跨区块空运 | `SectorTroopAirliftManager`(1103) / `TroopAirliftMath`(1186) / `TroopAirliftAssets`(163) |
+| 空运方块 | `world/blocks/campaign/TroopLaunchPad`(1002)：区块间单位投送 |
+| 落地机制 | 落地后恢复单位编队；新增「落地部署」「轨道创伤」状态效果 |
+| 滩头登陆 | 区块进入逻辑支持**无核心**登陆 |
+| 扩展接口 | `CrossSectorTroopExtension` |
+| UI | `PlanetDialog`(+1401/−236)、`HudFragment`(+55) |
+| 测试 | `TroopAirliftTests`(401) |
+
+### 同时合入（v3.2，此前未打包）
+
+| 模块 | 说明 |
+|---|---|
+| 持久化优化 | 物流/电网管理器改为**增量脏状态持久化**，存档/退出时显式 flush（替代周期性全量序列化） |
+| 战略层 | `PlanetNetworkSolver`(+105/−43)、`StrategySimulationEngine`(+42/−9) |
+
+### 未合并内容
+
+- `public/assets/aistudio/*.jpg`（AI Studio 截图残留）
+- `AI交接文档_v3.2.md`（交接文档，不属于构建内容）
+
+### 装包侧复核
+
+| 检查项 | 结果 |
+|---|---|
+| `Comparator.comparing*` / `List.of` / `Map.of` 实际调用 | ✅ 无（新代码注释里还主动声明了遵守该约束） |
+| `addLast(item.id)`（short 未强转） | ✅ 无 |
+| `SurgeSectorPowerHub` 的 `mindustry.type` import | ✅ 保留 |
 ## v3.1 — 2026-11-22（全球物流强制化 + 跨区块扩展接口）
 
 ### 变更
