@@ -24,6 +24,10 @@
 | 持久化优化 | 物流/电网管理器改为**增量脏状态持久化**，存档/退出时显式 flush（替代周期性全量序列化） |
 | 战略层 | `PlanetNetworkSolver`(+105/−43)、`StrategySimulationEngine`(+42/−9) |
 
+### 装包侧修复
+
+： 不存在（ 是  的方法），改为 ，共 2 处。
+
 ### 未合并内容
 
 - `public/assets/aistudio/*.jpg`（AI Studio 截图残留）

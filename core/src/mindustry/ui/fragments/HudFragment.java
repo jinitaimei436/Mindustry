@@ -631,7 +631,7 @@ public class HudFragment{
                 // Reserved UI & animation slots: "ui-airlift-banner-bg", "ui-airlift-banner-anim-0..N"
                 c.collapser(top -> {
                     Drawable bannerBg = TroopAirliftAssets.drawableOrFallback(TroopAirliftAssets.UI_AIRLIFT_BANNER_BG, Styles.black6);
-                    top.background(bannerBg).pad(8f);
+                    top.background(bannerBg).margin(8f);
                     top.left();
 
                     TextureRegion[] bannerAnimFrames = TroopAirliftAssets.loadFrameSequence(TroopAirliftAssets.UI_AIRLIFT_BANNER_ANIM);
@@ -671,7 +671,7 @@ public class HudFragment{
                 // V3.9: Recent critical troop airlift alert banner (e.g., "编队迷失")
                 // Reserved icon slot: "ui-airlift-lost-icon"
                 c.collapser(top -> {
-                    top.background(Styles.black6).pad(8f);
+                    top.background(Styles.black6).margin(8f);
                     Drawable lostIcon = TroopAirliftAssets.drawableOrFallback(TroopAirliftAssets.UI_AIRLIFT_LOST_ICON, Icon.warningSmall);
                     top.image(lostIcon).color(Pal.remove).size(20f).padRight(8f);
                     top.label(() -> SectorTroopAirliftManager.get().getRecentAlertText())
