@@ -26,7 +26,7 @@
 
 ### 装包侧修复
 
-： 不存在（ 是  的方法），改为 ，共 2 处。
+`HudFragment.java:634/674`：`Table.pad(float)` 不存在（`pad` 是 `Cell` 的方法），改为 `Table.margin(float)`，共 2 处。
 
 ### 未合并内容
 
