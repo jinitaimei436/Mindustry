@@ -2324,6 +2324,7 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
             localCap = snap.batteryCapacity;
         }
 
+        final GridAggregate fAggOuter = agg;
         long localProd = Math.round(localProdSec);
         long localNeed = Math.round(localNeedSec);
         long localNet = localProd - localNeed;
@@ -2347,7 +2348,7 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
                 card.add("[lightgray]消耗量： [white]-" + UI.formatAmount(localNeed) + "/s").row();
 
                 String roleHint = "";
-                if(hasHub && agg != null && agg.sectorCount() > 1){
+                if(hasHub && fAggOuter != null && fAggOuter.sectorCount() > 1){
                     if(localNet > 0){
                         roleHint = " [lightgray](向跨区电网净输出)";
                     }else if(localNet < 0){
@@ -2366,8 +2367,8 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
             }).growX().row();
 
             // Section 2: Inter-sector power grid details
-            if(hasHub && agg != null){
-                final GridAggregate fAgg = agg;
+            if(hasHub && fAggOuter != null){
+                final GridAggregate fAgg = fAggOuter;
                 long gProd = Math.round(fAgg.totalProduced * 60f);
                 long gNeed = Math.round(fAgg.totalNeeded * 60f);
                 long gNet = gProd - gNeed;
